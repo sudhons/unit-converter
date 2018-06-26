@@ -1,6 +1,16 @@
 document.querySelector('#measure').addEventListener('change', setUnits);
 document.querySelector('#form').addEventListener('submit', getOutput);
 
+document.querySelector('#inputUnit').addEventListener('change', () => document.querySelector('#output').innerHTML = '');
+document.querySelector('#outputUnit').addEventListener('change', () => {
+    const inputUnitValue = document.querySelector('#inputUnit').value;
+    const inputValue = document.querySelector('#input').value;
+
+    if ( inputUnitValue != 'Select Input Unit' && inputValue != '') {
+        getOutput()
+    }
+});
+
 // Measure Values
 const measures = {
     weight: {
@@ -34,40 +44,47 @@ const measures = {
         'cubic metres': 1,
         'cubic inches': 61023.7440947,
         'cubic feet': 35.314666721489,
-        'gallon': 264.17205235815,
-        'barrel': 8.3864143605761,
+        'gallons': 264.17205235815,
+        'barrels': 8.3864143605761,
         'liters': 1000,
     }
 };
 
 // Create Units Select Element
 function setUnits() {
-    const unitSelect = document.querySelector('#unitSelect');
-    unitSelect.innerHTML = '';
-    unitSelect.setAttribute('name', this.value);
+    const inputUnit = document.querySelector('#inputUnit');
+    const outputUnit = document.querySelector('#outputUnit');
+
+    inputUnit.innerHTML = '<option selected disabled>Select Input Unit</option>';
+    outputUnit.innerHTML = '<option selected disabled>Select Output Unit</option><option>All Units</option>';
+
+    inputUnit.setAttribute('name', this.value);
+    
     const units = Object.keys(measures[this.value]);
     units.shift();
-
+    
     const options = units.reduce( (prev, current) => (
         prev += `<option value="${current}">${current[0].toUpperCase() + current.slice(1)}</option>`
-    ), '<option selected disabled>Select Unit</option>');
+    ), '');
     
-    unitSelect.innerHTML = options;
+    inputUnit.innerHTML += options;
+    outputUnit.innerHTML += options;
     
     document.querySelector('#output').innerHTML = '';
+
 }
 
 function getOutput(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     const measureValue = document.querySelector('#measure').value;
 
     if (measureValue == 'Select Measure') {
         return alertError('Select a measure');
     }
 
-    const unitValue = document.querySelector(`#unitSelect[name=${measureValue}]`).value;
-    if ( unitValue == 'Select Unit') {
-        return alertError('Select a unit of measurement');
+    const inputUnitValue = document.querySelector('#inputUnit').value;
+    if ( inputUnitValue == 'Select Input Unit') {
+        return alertError('Select Input Unit');
     }
 
     const inputValue = document.querySelector('input').value;
@@ -75,7 +92,12 @@ function getOutput(e) {
         return alertError('Enter a value to convert');
     }
 
-    const result = convert(measureValue, unitValue, inputValue);
+    const outputUnitValue = document.querySelector('#outputUnit').value;
+    if ( outputUnitValue == 'Select Output Unit') {
+        return alertError('Select Output Unit');
+    }
+
+    const result = convert(measureValue, inputUnitValue, inputValue, outputUnitValue);
     
     const output = Object.keys(result).reduce( (prev, measure) => (
         prev += `<li class="list-group-item list-group-item-secondary font-weight-bold">${Math.round(result[measure] * 10000) / 10000} ${measure}</li>`), '<ul class="list-group text-left">') + '</ul>';
@@ -92,16 +114,20 @@ function alertError(errorMessage){
     setTimeout( () => alertDiv.remove(), 2000);
 }
 
-function convert(measure, unit, input){
+function convert(measure, inputUnit, input, outputUnit){
     const weightObj = Object.create(null);
     const measureProperty = measures[measure];
 
-    const inputInBasicUnit = input / measureProperty[unit];
+    const inputInBasicUnit = input / measureProperty[inputUnit];
 
-    for(let measureUnit in measureProperty) {
-        if(measureUnit !== '_unitBase') {
-            weightObj[measureUnit] = inputInBasicUnit * measureProperty[measureUnit];
+    if (outputUnit === 'All Units') {
+        for(let measureUnit in measureProperty) {
+            if(measureUnit !== '_unitBase' && measureUnit !== inputUnit) {
+                weightObj[measureUnit] = inputInBasicUnit * measureProperty[measureUnit];
+            }
         }
+    } else {
+        weightObj[outputUnit] = inputInBasicUnit * measureProperty[outputUnit];
     }
     
     return weightObj;

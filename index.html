@@ -11,7 +11,7 @@
     <div class="container text-white py-5">
         <div class="row">
             <div id="content" class="col-sm-10 col-md-8 col-lg-6 mx-4 mx-sm-auto text-center card bg-secondary p-4">
-                <h1 class="mb-4 display-4">Measure Converter</h1>
+                <h1 class="mb-4 display-4">Units Converter</h1>
                 <form id="form">
                     <div class="d-flex form-group">
                         <div class="d-inline w-50 mr-2" >
@@ -25,13 +25,21 @@
                         </div>
 
                         <div class="d-inline w-50" id="unitsDiv">
-                            <select class="form-control" id="unitSelect">
+                            <select class="form-control" id="inputUnit">
+                                    <option selected disabled>Select Input Unit</option>
                             </select>
                         </div>
                     </div>
 
+
                     <div class="form-group">
-                        <input class="form-control" type="number" name="number" id="input" placeholder="Enter a number" step=".0001" min="0">
+                        <input class="form-control" type="number" name="number" id="input" placeholder="Enter a measurement value" step=".0001" min="0">
+                    </div>
+
+                    <div class="d-flex form-group">
+                        <select class="form-control" id="outputUnit">
+                            <option selected disabled>Select Output Unit</option>
+                        </select>
                     </div>
 
                     
